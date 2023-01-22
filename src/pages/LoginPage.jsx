@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 // Librares
 import * as Yup from "yup";
-// import { useHistory } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useFormik, FormikProvider } from "formik";
+import { useFormik, FormikProvider, replace } from "formik";
 // Store
 import { login } from "../store/authSlice";
 import { clearMessage } from "../store/messageSlice";
@@ -15,6 +14,7 @@ import TextField from "../components/inputs/TextInput";
 import Card from "../components/Card";
 // Icons
 import { UserIcon, KeyIcon } from "@heroicons/react/outline";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const validationSchema = Yup.object().shape({
     username: Yup.string().required("This field is required!"),
@@ -29,8 +29,9 @@ const initialValues = {
 const LoginPage = () => {
     const [loading, setLoading] = useState(false);
     const { message } = useSelector((state) => state.message);
-    // const history = useHistory();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
+    const location = useLocation();
 
     useEffect(() => {
         dispatch(clearMessage());
@@ -39,13 +40,15 @@ const LoginPage = () => {
     const handleLogin = (formValue) => {
         const { username, password } = formValue;
         setLoading(true);
-        // const redirect = history.location.state
-        //     ? history.location.state.referrer.pathname
-        //     : null;
+
+        const redirect = location.state
+            ? location.state.referrer.pathname
+            : "/posts";
+
         dispatch(login({ username, password }))
             .unwrap()
             .then(() => {
-                // history.push(redirect || "/");
+                navigate(redirect, { replace: true });
             })
             .catch(() => {
                 setLoading(false);
